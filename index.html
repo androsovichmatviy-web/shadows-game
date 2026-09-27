@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дар Вечности: Эферин</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="viewport"></div>
+  <div id="crosshair" class="crosshair"></div>
+
+  <div id="reactionBanner" class="reaction-banner"></div>
+  <div id="floaters" class="floaters-layer"></div>
+
+  <div id="hud" class="hud">
+    <div class="party-bar" id="partyBar"></div>
+    <div class="active-panel">
+      <div class="active-name" id="activeName">—</div>
+      <div class="bar hp-bar"><div class="bar-fill" id="activeHpFill"></div></div>
+      <div class="bar energy-bar"><div class="bar-fill" id="activeEnergyFill"></div></div>
+    </div>
+    <div class="stamina-wrap" id="staminaWrap">
+      <div class="bar stamina-bar"><div class="bar-fill" id="staminaFill"></div></div>
+    </div>
+  </div>
+
+  <div id="enemyHud" class="enemy-hud hidden">
+    <div class="enemy-name" id="enemyName">—</div>
+    <div class="bar enemy-hp-bar"><div class="bar-fill" id="enemyHpFill"></div></div>
+  </div>
+
+  <div id="hint" class="hint">
+    WASD — движение · ЛКМ/Пробел — атака · E — навык · Q — взрыв стихии · 1–5 — отряд · Shift — рывок · ПКМ+мышь — камера · колесо — зум · C — архив мира
+  </div>
+
+  <button id="codexBtn" class="codex-btn" title="Архив мира (C)">☰ Архив</button>
+  <div id="codex" class="codex hidden">
+    <div class="codex-inner">
+      <h2>Архив странника</h2>
+      <div id="codexBody"></div>
+      <button id="codexClose" class="codex-close">Закрыть (C)</button>
+    </div>
+  </div>
+
+  <div id="dialogue" class="dialogue hidden">
+    <div class="dialogue-box">
+      <div class="dialogue-speaker" id="dSpeaker">—</div>
+      <div class="dialogue-text" id="dText"></div>
+      <div class="dialogue-next" id="dNext">▼ нажмите, чтобы продолжить</div>
+    </div>
+  </div>
+
+  <script type="module" src="src/game.js"></script>
+</body>
+</html>
