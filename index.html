@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тенепад</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Тенепад — головоломка с падающими осколками света: кристаллы, лучи, цепные реакции и прилив тьмы. Бесконечный режим и 12 уровней.">
+<meta name="theme-color" content="#0d0a1a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230d0a1a'/%3E%3Cpath d='M6 6h14l6 6v14H6z' fill='%23f6b85c'/%3E%3Cpath d='M6 6h12L6 18z' fill='%23ffe2a8'/%3E%3Cpath d='M16 13l3 4-3 4-3-4z' fill='%23fffaf0'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Unbounded:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="bg" class="bg" aria-hidden="true"></canvas>
+<div class="app" id="app">
+
+  <!-- Главное меню -->
+  <section class="screen" id="screenMenu">
+    <div class="menu">
+      <p class="eyebrow">головоломка о свете и тенях</p>
+      <h1 class="logo">Тенепад</h1>
+      <p class="tagline">Осколки света падают во тьму. Собирай ряды, поджигай кристаллы и не дай теням подняться до самого верха.</p>
+      <div class="menu-actions">
+        <button class="btn btn-primary" id="btnEndless" type="button">
+          <span class="btn-title">Бесконечный режим</span>
+          <span class="btn-meta" id="menuBest">рекорд 0</span>
+        </button>
+        <button class="btn" id="btnLevels" type="button">
+          <span class="btn-title">Уровни</span>
+          <span class="btn-meta" id="menuStars">0 / 36 ★</span>
+        </button>
+        <button class="btn btn-quiet" type="button" data-go="help">
+          <span class="btn-title">Как играть</span>
+        </button>
+      </div>
+      <button class="text-toggle" id="menuSound" type="button">Звук включён</button>
+    </div>
+  </section>
+
+  <!-- Выбор уровня -->
+  <section class="screen" id="screenLevels" hidden>
+    <div class="sheet">
+      <header class="sheet-head">
+        <button class="back" type="button" data-go="menu">← Меню</button>
+        <h2>Уровни</h2>
+        <span class="sheet-meta" id="levelsStars">0 / 36 ★</span>
+      </header>
+      <p class="sheet-lead">Двенадцать испытаний. Каждый пройденный уровень открывает следующий, а звёзды дают за экономную игру.</p>
+      <ol class="level-grid" id="levelGrid"></ol>
+    </div>
+  </section>
+
+  <!-- Правила -->
+  <section class="screen" id="screenHelp" hidden>
+    <div class="sheet sheet-text">
+      <header class="sheet-head">
+        <button class="back" type="button" data-go="menu">← Меню</button>
+        <h2>Как играть</h2>
+      </header>
+      <div class="rules">
+        <article class="rule">
+          <h3>Осколки</h3>
+          <p>Сверху падают фигуры из двух–пяти клеток: Пара, Прут, Уголок, Плита, Крюк, Ступень, Звезда, Арка, Вилка, Лестница, Флаг, Угол, Молния и Шпиль. Поле — 11 клеток в ширину и 18 в высоту.</p>
+        </article>
+        <article class="rule">
+          <h3>Линии</h3>
+          <p>Заполненный целиком ряд рассыпается, всё, что выше, опускается. Чем больше рядов за раз, тем больше очков, а линии подряд складываются в серию.</p>
+        </article>
+        <article class="rule">
+          <h3>Отражение</h3>
+          <p>Кроме поворота, любой осколок можно отразить зеркально. Крюк превращается в своего двойника, Ступень меняет наклон.</p>
+        </article>
+        <article class="rule">
+          <h3>Кристаллы и лучи</h3>
+          <p>Некоторые осколки несут светящийся кристалл. Когда ряд с кристаллом исчезает, кристалл бьёт вертикальным лучом и выжигает весь свой столбец.</p>
+        </article>
+        <article class="rule">
+          <h3>Цепная реакция</h3>
+          <p>Если луч задевает другой кристалл, тот вспыхивает и выжигает свой ряд целиком. Новые кристаллы в этом ряду продолжают цепочку. Каждое звено цепи дорого стоит.</p>
+        </article>
+        <article class="rule">
+          <h3>Тени</h3>
+          <p>Тёмные глыбы занимают место в рядах. Их уносят только собранные линии, лучи и Вспышка. На некоторых уровнях цель — рассеять все тени.</p>
+        </article>
+        <article class="rule">
+          <h3>Прилив тьмы</h3>
+          <p>В бесконечном режиме, начиная с глубины 2, снизу поднимается ряд теней с одной щелью. Чем глубже, тем чаще. Заполни щель, и ряд рассыплется.</p>
+        </article>
+        <article class="rule">
+          <h3>Сияние и Вспышка</h3>
+          <p>Линии и лучи наполняют шкалу Сияния. Когда она полна, Вспышка мгновенно сжигает два нижних ряда, а кристаллы в них тоже срабатывают.</p>
+        </article>
+        <article class="rule">
+          <h3>Глубина</h3>
+          <p>Каждые 10 линий бесконечного режима — новая глубина: осколки падают быстрее, крупные фигуры выпадают чаще, а все очки умножаются на номер глубины.</p>
+        </article>
+      </div>
+      <h3 class="keys-title">Управление</h3>
+      <div class="controls">
+        <dl class="control-list">
+          <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>двигать</dd></div>
+          <div><dt><kbd>↑</kbd> / <kbd>Z</kbd></dt><dd>повернуть по и против часовой</dd></div>
+          <div><dt><kbd>C</kbd></dt><dd>отразить</dd></div>
+          <div><dt><kbd>↓</kbd></dt><dd>ускорить падение</dd></div>
+          <div><dt><kbd>Пробел</kbd></dt><dd>сбросить вниз</dd></div>
+          <div><dt><kbd>F</kbd></dt><dd>Вспышка</dd></div>
+          <div><dt><kbd>P</kbd> / <kbd>Esc</kbd></dt><dd>пауза</dd></div>
+          <div><dt><kbd>M</kbd></dt><dd>звук</dd></div>
+        </dl>
+        <p class="touch-note">На телефоне: кнопки под полем, касание поля — поворот, свайп вбок — сдвиг, резкий свайп вниз — сброс. Кнопка «Сияние» запускает Вспышку.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Игра -->
+  <main class="game" id="game" hidden>
+    <section class="hud hud-main" id="hudMain" aria-label="Состояние игры">
+      <div class="hud-head">
+        <div class="hud-title">
+          <span class="hud-mode" id="hudMode">Бесконечный</span>
+          <span class="hud-sub" id="hudSub"></span>
+        </div>
+        <div class="hud-tools">
+          <button class="icon-btn" id="btnSound" type="button" aria-label="Выключить звук" title="Звук (M)">
+            <svg class="i-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg class="i-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 9.5l5 5m0-5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <button class="icon-btn" id="btnPause" type="button" aria-label="Пауза" title="Пауза (P)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+      <dl class="stats">
+        <div class="stat stat-score"><dt>Счёт</dt><dd id="hudScore">0</dd></div>
+        <div class="stat" id="statBest"><dt>Рекорд</dt><dd id="hudBest">0</dd></div>
+        <div class="stat"><dt>Линии</dt><dd id="hudLines">0</dd></div>
+        <div class="stat" id="statDepth"><dt>Глубина</dt><dd id="hudDepth">1</dd></div>
+        <div class="stat" id="statLimit" hidden><dt id="hudLimitLabel">Осталось</dt><dd id="hudLimit">0</dd></div>
+      </dl>
+      <div class="goal" id="hudGoal" hidden>
+        <div class="goal-row"><span id="hudGoalLabel">Цель</span><span class="goal-value" id="hudGoalValue">0 / 0</span></div>
+        <div class="bar"><div class="bar-fill" id="hudGoalFill"></div></div>
+      </div>
+      <ul class="keys" aria-label="Клавиши">
+        <li><span><kbd>←</kbd><kbd>→</kbd></span>двигать</li>
+        <li><span><kbd>↑</kbd><kbd>Z</kbd></span>повернуть</li>
+        <li><span><kbd>C</kbd></span>отразить</li>
+        <li><span><kbd>↓</kbd></span>быстрее</li>
+        <li><span><kbd>Пробел</kbd></span>сбросить</li>
+        <li><span><kbd>F</kbd></span>Вспышка</li>
+      </ul>
+    </section>
+
+    <div class="well" id="well">
+      <canvas id="board" aria-label="Игровое поле"></canvas>
+    </div>
+
+    <section class="hud hud-side" id="hudSide" aria-label="Очередь и Сияние">
+      <div class="next-wrap" id="nextWrap">
+        <span class="label">Дальше</span>
+        <canvas id="next" aria-label="Следующие осколки"></canvas>
+      </div>
+      <button class="charge" id="btnFlash" type="button" tabindex="-1" aria-label="Вспышка">
+        <span class="label">Сияние</span>
+        <span class="meter"><span class="meter-fill" id="chargeFill"></span></span>
+        <span class="charge-hint" id="chargeHint">копится от линий</span>
+      </button>
+      <div class="tide" id="hudTide">
+        <span class="label">Прилив</span>
+        <span class="tide-value" id="hudTideValue">—</span>
+      </div>
+    </section>
+
+    <div class="pad" id="pad">
+      <div class="pad-group">
+        <button class="pad-btn" type="button" tabindex="-1" data-act="left" aria-label="Влево">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="pad-btn" type="button" tabindex="-1" data-act="soft" aria-label="Ускорить падение">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="pad-btn" type="button" tabindex="-1" data-act="right" aria-label="Вправо">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="pad-group">
+        <button class="pad-btn" type="button" tabindex="-1" data-act="mirror" aria-label="Отразить">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 2.4"/><path d="M9.5 7L4 17h5.5z" fill="currentColor"/><path d="M14.5 7L20 17h-5.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="pad-btn" type="button" tabindex="-1" data-act="rotate" aria-label="Повернуть">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M19.5 4v4.5H15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="pad-btn pad-drop" type="button" tabindex="-1" data-act="drop" aria-label="Сбросить вниз">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5l6 6 6-6M6 11l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20.5h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Описание уровня -->
+  <section class="screen modal" id="screenBrief" hidden>
+    <div class="card">
+      <p class="eyebrow" id="briefNum">Уровень 1</p>
+      <h2 class="card-title" id="briefName">Первый свет</h2>
+      <p class="card-text" id="briefText"></p>
+      <dl class="facts">
+        <div><dt>Цель</dt><dd id="briefGoal"></dd></div>
+        <div id="briefLimitRow"><dt>Условие</dt><dd id="briefLimit"></dd></div>
+        <div><dt>Звёзды</dt><dd id="briefStars"></dd></div>
+      </dl>
+      <p class="hint" id="briefHint"></p>
+      <div class="card-actions">
+        <button class="btn btn-primary" id="btnBriefStart" type="button"><span class="btn-title">Начать</span><span class="btn-meta" id="briefBest"></span></button>
+        <button class="btn btn-quiet" type="button" data-go="levels"><span class="btn-title">К уровням</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Пауза -->
+  <section class="screen modal" id="screenPause" hidden>
+    <div class="card card-narrow">
+      <p class="eyebrow" id="pauseEyebrow">Бесконечный режим</p>
+      <h2 class="card-title">Пауза</h2>
+      <div class="card-actions">
+        <button class="btn btn-primary" id="btnResume" type="button"><span class="btn-title">Продолжить</span></button>
+        <button class="btn" id="btnRestart" type="button"><span class="btn-title">Начать заново</span></button>
+        <button class="btn btn-quiet" id="btnQuit" type="button"><span class="btn-title">Выйти</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Поражение / конец бесконечной игры -->
+  <section class="screen modal" id="screenOver" hidden>
+    <div class="card">
+      <p class="eyebrow" id="overEyebrow">Бесконечный режим</p>
+      <h2 class="card-title" id="overTitle">Тьма поднялась</h2>
+      <p class="card-text" id="overNote"></p>
+      <dl class="result-stats" id="overStats"></dl>
+      <div class="card-actions">
+        <button class="btn btn-primary" id="btnOverRetry" type="button"><span class="btn-title">Ещё раз</span></button>
+        <button class="btn btn-quiet" id="btnOverExit" type="button"><span class="btn-title">В меню</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Победа на уровне -->
+  <section class="screen modal" id="screenWin" hidden>
+    <div class="card">
+      <p class="eyebrow" id="winNum">Уровень 1</p>
+      <h2 class="card-title">Свет пробился</h2>
+      <div class="star-row" id="winStars"></div>
+      <p class="card-text" id="winNote"></p>
+      <dl class="result-stats" id="winStats"></dl>
+      <div class="card-actions">
+        <button class="btn btn-primary" id="btnWinNext" type="button"><span class="btn-title">Следующий уровень</span></button>
+        <button class="btn" id="btnWinRetry" type="button"><span class="btn-title">Ещё раз</span></button>
+        <button class="btn btn-quiet" type="button" data-go="levels"><span class="btn-title">К уровням</span></button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="js/pieces.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/render.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
